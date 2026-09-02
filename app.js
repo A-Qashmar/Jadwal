@@ -1,5 +1,6 @@
 /**
- * Jadwal — Personal Time Manager Engine
+ * Jadwal — Personal Time Operating System (TIME.OS)
+ * Full Engine: 24H Timeline, Drag & Drop, Stretch Resizing, Context Menu, Export/Import
  */
 
 const KEY = "jadwal-matrix-v1";
@@ -15,6 +16,7 @@ const dateKey = d => {
 
 const todayKey = dateKey(new Date());
 
+// ================= CATEGORY LOCALIZATION =================
 const CATEGORIES = {
   ar: {
     focus: "تركيز عميق",
@@ -34,6 +36,7 @@ const CATEGORIES = {
   }
 };
 
+// ================= I18N TRANSLATION MATRIX =================
 const I18N = {
   ar: {
     navToday: "اليوم",
@@ -98,7 +101,12 @@ const I18N = {
     ctxUndone: "إلغاء الإكمال",
     ctxFocus: "بدء التركيز",
     ctxDuplicate: "نسخ القالب",
-    ctxDelete: "حذف القالب"
+    ctxDelete: "حذف القالب",
+    exportData: "تصدير",
+    importData: "استيراد",
+    toastExported: "تم تنزيل ملف النسخة الاحتياطية 📥",
+    toastImported: "تم استيراد قوالبك ومهامك بنجاح 📤",
+    alertImportFail: "الملف غير صالح، يرجى اختيار ملف JSON سليم تم تصديره من Jadwal."
   },
   en: {
     navToday: "Today",
@@ -163,13 +171,19 @@ const I18N = {
     ctxUndone: "Mark as Incomplete",
     ctxFocus: "Start Focus",
     ctxDuplicate: "Duplicate Block",
-    ctxDelete: "Delete Block"
+    ctxDelete: "Delete Block",
+    exportData: "Export",
+    importData: "Import",
+    toastExported: "Backup downloaded successfully 📥",
+    toastImported: "Data imported successfully 📤",
+    alertImportFail: "Invalid file. Please select a valid JSON backup exported from Jadwal."
   }
 };
 
 let currentLang = localStorage.getItem(LANG_KEY) || "ar";
 let currentTheme = localStorage.getItem(THEME_KEY) || "light";
 
+// ================= THEME SYSTEM =================
 function applyTheme(theme) {
   currentTheme = theme;
   localStorage.setItem(THEME_KEY, theme);
@@ -180,10 +194,13 @@ function applyTheme(theme) {
   if (text) text.textContent = currentLang === "ar" ? (theme === "dark" ? "فاتح" : "داكن") : (theme === "dark" ? "Light" : "Dark");
 }
 
-$("themeBtn").onclick = () => {
-  applyTheme(currentTheme === "dark" ? "light" : "dark");
-};
+if ($("themeBtn")) {
+  $("themeBtn").onclick = () => {
+    applyTheme(currentTheme === "dark" ? "light" : "dark");
+  };
+}
 
+// ================= LOCALIZATION CONTROLS =================
 function updateCategoryDropdown() {
   const catSelect = $("blockCategory");
   if (!catSelect) return;
@@ -204,7 +221,7 @@ function setLanguage(lang) {
   localStorage.setItem(LANG_KEY, lang);
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-  
+
   if ($("langBtn")) $("langBtn").textContent = lang === "ar" ? "English" : "عربي";
 
   document.querySelectorAll("[data-i18n]").forEach(el => {
@@ -222,6 +239,7 @@ if ($("langBtn")) {
   $("langBtn").onclick = () => setLanguage(currentLang === "ar" ? "en" : "ar");
 }
 
+// ================= STATE & PERSISTENCE =================
 let state = JSON.parse(localStorage.getItem(KEY) || "null") || {
   blocks: [
     { id: crypto.randomUUID(), date: todayKey, title: "الروتين الصباحي والتأمل", start: "07:00", end: "08:00", category: "health", done: false },
@@ -290,6 +308,7 @@ function showToast(msg) {
   setTimeout(() => t.classList.add("hidden"), 2200);
 }
 
+// ================= OVERLAP & COLLISION CLUSTERING =================
 function layoutClusterBlocks(blocks) {
   if (!blocks.length) return [];
   const sorted = [...blocks].sort((a, b) => {
@@ -346,6 +365,7 @@ function layoutClusterBlocks(blocks) {
   return result;
 }
 
+// Variables for drag, clone, and resize state
 let draggedBlockId = null;
 let isAltCloning = false;
 let isRightDragging = false;
@@ -355,7 +375,7 @@ let didRightDragMove = false;
 let startX = 0, startY = 0;
 let isResizingActive = false;
 
-// القائمة المنبثقة
+// ================= CONTEXT MENU LOGIC =================
 const ctxMenu = $("contextMenu");
 let activeContextBlock = null;
 
@@ -403,24 +423,52 @@ window.addEventListener("keydown", (e) => {
 });
 window.addEventListener("scroll", hideContextMenu, true);
 
-if ($("ctxEdit")) $("ctxEdit").onclick = () => { if (activeContextBlock) openModal(activeContextBlock); hideContextMenu(); };
-if ($("ctxToggleDone")) $("ctxToggleDone").onclick = () => {
-  if (activeContextBlock) { activeContextBlock.done = !activeContextBlock.done; save(); render(); }
-  hideContextMenu();
-};
-if ($("ctxFocus")) $("ctxFocus").onclick = () => { if (activeContextBlock) openFocus(activeContextBlock); hideContextMenu(); };
-if ($("ctxDuplicate")) $("ctxDuplicate").onclick = () => { if (activeContextBlock) duplicateBlockById(null, activeContextBlock.id); hideContextMenu(); };
-if ($("ctxDelete")) $("ctxDelete").onclick = () => {
-  if (activeContextBlock) {
-    const id = activeContextBlock.id;
-    state.blocks = state.blocks.filter(b => b.id !== id);
-    save();
-    render();
-    showToast(I18N[currentLang].toastDeleted);
-  }
-  hideContextMenu();
-};
+if ($("ctxEdit")) {
+  $("ctxEdit").onclick = () => {
+    if (activeContextBlock) openModal(activeContextBlock);
+    hideContextMenu();
+  };
+}
 
+if ($("ctxToggleDone")) {
+  $("ctxToggleDone").onclick = () => {
+    if (activeContextBlock) {
+      activeContextBlock.done = !activeContextBlock.done;
+      save();
+      render();
+    }
+    hideContextMenu();
+  };
+}
+
+if ($("ctxFocus")) {
+  $("ctxFocus").onclick = () => {
+    if (activeContextBlock) openFocus(activeContextBlock);
+    hideContextMenu();
+  };
+}
+
+if ($("ctxDuplicate")) {
+  $("ctxDuplicate").onclick = () => {
+    if (activeContextBlock) duplicateBlockById(null, activeContextBlock.id);
+    hideContextMenu();
+  };
+}
+
+if ($("ctxDelete")) {
+  $("ctxDelete").onclick = () => {
+    if (activeContextBlock) {
+      const id = activeContextBlock.id;
+      state.blocks = state.blocks.filter(b => b.id !== id);
+      save();
+      render();
+      showToast(I18N[currentLang].toastDeleted);
+    }
+    hideContextMenu();
+  };
+}
+
+// ================= TIMELINE RENDERING =================
 function renderTimeline() {
   const key = dateKey(selectedDate);
   const list = blocksFor(key);
@@ -486,7 +534,10 @@ function renderTimeline() {
     x.ondblclick = () => openFocus(b);
 
     x.addEventListener("dragstart", (e) => {
-      if (isResizingActive) { e.preventDefault(); return; }
+      if (isResizingActive) {
+        e.preventDefault();
+        return;
+      }
       draggedBlockId = b.id;
       isAltCloning = e.altKey;
       x.classList.add("dragging");
@@ -513,7 +564,10 @@ function renderTimeline() {
     el.appendChild(x);
   });
 
-  el.ondragover = (e) => { e.preventDefault(); el.classList.add("drag-active"); };
+  el.ondragover = (e) => {
+    e.preventDefault();
+    el.classList.add("drag-active");
+  };
   el.ondragleave = () => el.classList.remove("drag-active");
 
   el.ondrop = (e) => {
@@ -532,7 +586,13 @@ function renderTimeline() {
     const newEndMin = newStartMin + duration;
 
     if (isAltCloning) {
-      const cloned = { ...b, id: crypto.randomUUID(), start: minToTime(newStartMin), end: minToTime(newEndMin), date: dateKey(selectedDate) };
+      const cloned = {
+        ...b,
+        id: crypto.randomUUID(),
+        start: minToTime(newStartMin),
+        end: minToTime(newEndMin),
+        date: dateKey(selectedDate)
+      };
       state.blocks.push(cloned);
       showToast(I18N[currentLang].toastCloned);
     } else {
@@ -548,6 +608,7 @@ function renderTimeline() {
   addNowLine(el, key);
 }
 
+// ================= STRETCH / RESIZE ENGINE =================
 function initResizeHandle(handle, block, position, blockElement) {
   if (!handle) return;
   handle.addEventListener("pointerdown", (e) => {
@@ -596,7 +657,9 @@ function initResizeHandle(handle, block, position, blockElement) {
       render();
       showToast(I18N[currentLang].toastResized);
 
-      setTimeout(() => { isResizingActive = false; }, 120);
+      setTimeout(() => {
+        isResizingActive = false;
+      }, 120);
     }
 
     window.addEventListener("pointermove", onPointerMove);
@@ -604,6 +667,7 @@ function initResizeHandle(handle, block, position, blockElement) {
   });
 }
 
+// ================= RIGHT-CLICK DRAG COPY TRACKER =================
 window.addEventListener("mousemove", (e) => {
   if (!isRightDragging || !rightDragBlock) return;
   const dist = Math.hypot(e.clientX - startX, e.clientY - startY);
@@ -649,7 +713,11 @@ window.addEventListener("mouseup", (e) => {
       } else if (weekDayCol) {
         const targetDate = weekDayCol.getAttribute("data-date");
         if (targetDate) {
-          const clone = { ...rightDragBlock, id: crypto.randomUUID(), date: targetDate };
+          const clone = {
+            ...rightDragBlock,
+            id: crypto.randomUUID(),
+            date: targetDate
+          };
           state.blocks.push(clone);
           save();
           render();
@@ -658,7 +726,10 @@ window.addEventListener("mouseup", (e) => {
       }
     }
 
-    if (rightDragGhost) { rightDragGhost.remove(); rightDragGhost = null; }
+    if (rightDragGhost) {
+      rightDragGhost.remove();
+      rightDragGhost = null;
+    }
     isRightDragging = false;
   }
 });
@@ -680,7 +751,14 @@ function duplicateBlockById(e, id) {
   if (newStart + duration > 1440) newStart = 0;
   const newEnd = newStart + duration;
 
-  const clone = { ...b, id: crypto.randomUUID(), start: minToTime(newStart), end: minToTime(newEnd), date: dateKey(selectedDate) };
+  const clone = {
+    ...b,
+    id: crypto.randomUUID(),
+    start: minToTime(newStart),
+    end: minToTime(newEnd),
+    date: dateKey(selectedDate)
+  };
+
   state.blocks.push(clone);
   save();
   render();
@@ -690,10 +768,14 @@ function duplicateBlockById(e, id) {
 if ($("duplicateBlockBtn")) {
   $("duplicateBlockBtn").onclick = () => {
     const currentId = $("blockId").value;
-    if (currentId) { duplicateBlockById(null, currentId); closeModal(); }
+    if (currentId) {
+      duplicateBlockById(null, currentId);
+      closeModal();
+    }
   };
 }
 
+// ================= INDICATORS & METRICS =================
 function addNowLine(el, key) {
   if (key !== todayKey) return;
   const now = new Date();
@@ -737,7 +819,11 @@ function renderSidePanel() {
   const t = I18N[currentLang];
 
   if ($("panelDate")) {
-    $("panelDate").textContent = d.toLocaleDateString(currentLang === "ar" ? "ar-SA" : "en-US", { weekday: "long", month: "short", day: "numeric" });
+    $("panelDate").textContent = d.toLocaleDateString(currentLang === "ar" ? "ar-SA" : "en-US", {
+      weekday: "long",
+      month: "short",
+      day: "numeric"
+    });
   }
 
   const next = list.find(b => !b.done && minutes(b.end) > minutes(new Date().toTimeString().slice(0, 5)));
@@ -754,6 +840,7 @@ function renderSidePanel() {
   }
 }
 
+// ================= WEEK VIEW =================
 function renderWeek() {
   const grid = $("weekGrid");
   if (!grid) return;
@@ -779,7 +866,10 @@ function renderWeek() {
       </div>
     `;
 
-    col.ondragover = (e) => { e.preventDefault(); col.classList.add("drag-over"); };
+    col.ondragover = (e) => {
+      e.preventDefault();
+      col.classList.add("drag-over");
+    };
     col.ondragleave = () => col.classList.remove("drag-over");
 
     col.ondrop = (e) => {
@@ -853,6 +943,7 @@ function renderWeek() {
   }
 }
 
+// ================= TASKS BOARD =================
 function renderTasks() {
   const el = $("taskList");
   if (!el) return;
@@ -885,10 +976,15 @@ function renderTasks() {
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
   }[c]));
 }
 
+// ================= MODAL DIALOGS =================
 function openModal(b = null, date = dateKey(selectedDate)) {
   const t = I18N[currentLang];
   if ($("modalBackdrop")) $("modalBackdrop").classList.remove("hidden");
@@ -957,7 +1053,9 @@ if ($("taskAddBtn")) $("taskAddBtn").onclick = () => $("quickTask").focus();
 
 if ($("quickAdd")) $("quickAdd").onclick = addTask;
 if ($("quickTask")) {
-  $("quickTask").onkeydown = (e) => { if (e.key === "Enter") addTask(); };
+  $("quickTask").onkeydown = (e) => {
+    if (e.key === "Enter") addTask();
+  };
 }
 
 function addTask() {
@@ -969,7 +1067,7 @@ function addTask() {
   renderTasks();
 }
 
-// التحكم في التنقل وإغلاق القائمة الجانبية على الجوال
+// ================= NAVIGATION & VIEW SWITCHING =================
 const backdrop = $("sidebarBackdrop");
 document.querySelectorAll(".nav-item[data-view]").forEach(btn => {
   btn.onclick = () => {
@@ -987,7 +1085,6 @@ if ($("prevDay")) $("prevDay").onclick = () => { selectedDate.setDate(selectedDa
 if ($("nextDay")) $("nextDay").onclick = () => { selectedDate.setDate(selectedDate.getDate() + 1); render(); };
 if ($("todayBtn")) $("todayBtn").onclick = () => { selectedDate = new Date(); render(); };
 
-// زر القائمة للجوال مع إغلاق الخلفية
 if ($("menuBtn")) {
   $("menuBtn").onclick = () => {
     const sidebar = $("sidebar");
@@ -1004,6 +1101,7 @@ if (backdrop) {
   };
 }
 
+// ================= LIVE CLOCK =================
 function updateClock() {
   const n = new Date();
   if ($("liveClock")) $("liveClock").textContent = `${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
@@ -1015,6 +1113,7 @@ function updateClock() {
   }
 }
 
+// ================= FOCUS MODE TIMER =================
 function openFocus(b) {
   if ($("focusOverlay")) $("focusOverlay").classList.remove("hidden");
   if ($("focusTitle")) $("focusTitle").textContent = b.title;
@@ -1067,6 +1166,58 @@ if ($("closeFocus")) {
   };
 }
 
+// ================= EXPORT & IMPORT BACKUP SYSTEM =================
+function exportBackup() {
+  const exportPayload = {
+    app: "Jadwal",
+    version: "1.0",
+    exportedAt: new Date().toISOString(),
+    blocks: state.blocks,
+    tasks: state.tasks
+  };
+
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
+  const dlAnchor = document.createElement("a");
+  const dateStr = new Date().toISOString().slice(0, 10);
+  dlAnchor.setAttribute("href", dataStr);
+  dlAnchor.setAttribute("download", `jadwal-backup-${dateStr}.json`);
+  document.body.appendChild(dlAnchor);
+  dlAnchor.click();
+  dlAnchor.remove();
+
+  showToast(I18N[currentLang].toastExported);
+}
+
+function handleImportFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const data = JSON.parse(evt.target.result);
+      if (data && (Array.isArray(data.blocks) || Array.isArray(data.tasks))) {
+        state.blocks = data.blocks || [];
+        state.tasks = data.tasks || [];
+        save();
+        render();
+        showToast(I18N[currentLang].toastImported);
+      } else {
+        alert(I18N[currentLang].alertImportFail);
+      }
+    } catch (err) {
+      alert(I18N[currentLang].alertImportFail);
+    }
+    $("importFileInput").value = "";
+  };
+  reader.readAsText(file);
+}
+
+if ($("exportBtn")) $("exportBtn").onclick = exportBackup;
+if ($("importBtn")) $("importBtn").onclick = () => $("importFileInput").click();
+if ($("importFileInput")) $("importFileInput").onchange = handleImportFile;
+
+// ================= MAIN RENDER PIPELINE =================
 function render() {
   if ($("dateLabel")) $("dateLabel").textContent = fmtDate(selectedDate);
   if ($("timezoneLabel")) $("timezoneLabel").textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -1078,6 +1229,7 @@ function render() {
   updateClock();
 }
 
+// Initial bootstrap
 setInterval(updateClock, 1000);
 applyTheme(currentTheme);
 setLanguage(currentLang);

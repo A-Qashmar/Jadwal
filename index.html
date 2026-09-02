@@ -29,6 +29,17 @@
         </button>
       </nav>
       <div class="sidebar-bottom">
+        <!-- أزرار النسخ الاحتياطي (تصدير / استيراد) -->
+        <div class="backup-actions">
+          <button class="backup-btn" id="exportBtn" title="تنزيل نسخة احتياطية">
+            <span>📥</span> <span data-i18n="exportData">تصدير</span>
+          </button>
+          <button class="backup-btn" id="importBtn" title="رفع نسخة احتياطية">
+            <span>📤</span> <span data-i18n="importData">استيراد</span>
+          </button>
+          <input type="file" id="importFileInput" accept="application/json" class="hidden">
+        </div>
+
         <button class="nav-item" id="themeBtn">
           <span id="themeIcon">◐</span> <span id="themeText" data-i18n="theme">المظهر</span>
         </button>

@@ -625,3 +625,36 @@ label { display: grid; gap: 7px; font-size: 11px; color: var(--muted); font-weig
   .form-grid { grid-template-columns: 1fr; }
   .focus-timer { font-size: 64px; }
 }
+
+/* أزرار النسخ الاحتياطي (تصدير واستيراد) */
+.backup-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 0 4px;
+  margin-bottom: 6px;
+}
+.backup-btn {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  user-select: none;
+}
+.backup-btn:hover {
+  background: var(--blue);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.backup-btn:active {
+  transform: translateY(0);
+}
