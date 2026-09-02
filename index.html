@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Jadwal — مدير الوقت الشخصي</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- خلفية معتمة تغلق القائمة عند لمسها على الجوال -->
+  <div class="sidebar-backdrop hidden" id="sidebarBackdrop"></div>
+
+  <div class="app-shell">
+    <!-- القائمة الجانبية -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-mark">◈</span>
+        <span>Jadwal</span>
+      </div>
+      <nav>
+        <button class="nav-item active" data-view="today">
+          <span>◷</span> <span data-i18n="navToday">اليوم</span>
+        </button>
+        <button class="nav-item" data-view="week">
+          <span>▦</span> <span data-i18n="navWeek">الأسبوع</span>
+        </button>
+        <button class="nav-item" data-view="tasks">
+          <span>✓</span> <span data-i18n="navTasks">المهام</span>
+        </button>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="nav-item" id="themeBtn">
+          <span id="themeIcon">◐</span> <span id="themeText" data-i18n="theme">المظهر</span>
+        </button>
+        <div class="storage-status">
+          <i></i> <span data-i18n="storage">التخزين المحلي</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main">
+      <header class="topbar">
+        <button class="mobile-menu" id="menuBtn" aria-label="Open Menu">☰</button>
+        <div class="date-nav">
+          <button class="icon-btn" id="prevDay">‹</button>
+          <button class="date-label" id="dateLabel"></button>
+          <button class="icon-btn" id="nextDay">›</button>
+          <button class="today-btn" id="todayBtn" data-i18n="todayBtn">اليوم</button>
+        </div>
+        <div class="top-actions">
+          <button class="lang-btn" id="langBtn">English</button>
+          <div class="live-clock" id="liveClock">00:00:00</div>
+        </div>
+      </header>
+
+      <!-- شاشة اليوم -->
+      <section class="view" id="todayView">
+        <div class="hero">
+          <div>
+            <p class="eyebrow" data-i18n="heroEyebrow">يومك، بتصميمك</p>
+            <h1 id="greeting">صباح الخير.</h1>
+            <p class="sub" id="daySummary">خطط لوقتك بوعي وإتقان.</p>
+          </div>
+          <div class="day-progress">
+            <div class="ring" id="progressRing"><span id="progressValue">0%</span></div>
+            <div>
+              <small data-i18n="dayProgress">إنجاز اليوم</small>
+              <strong id="progressText">0 / 0 مكتمل</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="timeline-wrap">
+            <div class="timeline-head">
+              <div>
+                <span class="timeline-title" data-i18n="timelineTitle">مخطط اليوم (24H)</span>
+                <small data-i18n="dragHint">انقر يمين الفأرة للخيارات السريعة، أو اسحب الأطراف للتحكم السريع بالوقت</small>
+              </div>
+              <span id="timezoneLabel"></span>
+            </div>
+            <div class="timeline" id="timeline"></div>
+          </div>
+
+          <aside class="day-panel">
+            <div class="panel-kicker" data-i18n="glanceKicker">نظرة سريعة على اليوم</div>
+            <div class="panel-date" id="panelDate">الأربعاء</div>
+            <div class="panel-big-time" id="panelTime">10:56</div>
+            <div class="panel-divider"></div>
+
+            <div class="next-label" data-i18n="nextUp">النشاط القادم</div>
+            <div class="next-card" id="nextCard">
+              <div class="next-dot"></div>
+              <div>
+                <strong id="nextTitle">لا يوجد نشاط مجدول</strong>
+                <span id="nextMeta">أضف قالباً لتبدأ يومك</span>
+              </div>
+            </div>
+
+            <div class="stats-stack">
+              <div class="mini-stat">
+                <span data-i18n="statPlanned">المخطط</span>
+                <strong id="plannedTime">0h 00m</strong>
+              </div>
+              <div class="mini-stat">
+                <span data-i18n="statFocus">التركيز العميق</span>
+                <strong id="focusTime">0h 00m</strong>
+              </div>
+              <div class="mini-stat">
+                <span data-i18n="statDone">المكتمل</span>
+                <strong id="doneTime">0h 00m</strong>
+              </div>
+              <div class="mini-stat free">
+                <span data-i18n="statFree">المتبقي</span>
+                <strong id="freeTime">24h 00m</strong>
+              </div>
+            </div>
+
+            <button class="panel-add" id="panelAdd">＋ <span data-i18n="planBlock">جدولة قالب زمني</span></button>
+          </aside>
+        </div>
+      </section>
+
+      <!-- شاشة الأسبوع -->
+      <section class="view hidden" id="weekView">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow" data-i18n="weekEyebrow">خطط مسبقاً</p>
+            <h2 data-i18n="weekTitle">الجدول الأسبوعي</h2>
+          </div>
+          <button class="add-btn" id="weekAddBtn">＋ <span data-i18n="addBlock">إضافة قالب</span></button>
+        </div>
+        <div class="week-grid" id="weekGrid"></div>
+      </section>
+
+      <!-- شاشة المهام -->
+      <section class="view hidden" id="tasksView">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow" data-i18n="tasksEyebrow">صندوق الوارد</p>
+            <h2 data-i18n="tasksTitle">المهام اليومية</h2>
+          </div>
+          <button class="add-btn" id="taskAddBtn">＋ <span data-i18n="newTask">مهمة جديدة</span></button>
+        </div>
+        <div class="task-input">
+          <input id="quickTask" placeholder="اكتب مهمة جديدة واضغط Enter…">
+          <button id="quickAdd" data-i18n="addBtn">إضافة</button>
+        </div>
+        <div class="task-list" id="taskList"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- قائمة الخيارات السريعة بالنقر بزر الفأرة الأيمن -->
+  <div id="contextMenu" class="context-menu hidden">
+    <button class="ctx-item" id="ctxEdit">
+      <span>✏️</span> <span data-i18n="ctxEdit">تعديل</span>
+    </button>
+    <button class="ctx-item" id="ctxToggleDone">
+      <span id="ctxDoneIcon">✓</span> <span id="ctxDoneText" data-i18n="ctxDone">تحديد كمكتمل</span>
+    </button>
+    <button class="ctx-item" id="ctxFocus">
+      <span>🎯</span> <span data-i18n="ctxFocus">بدء التركيز</span>
+    </button>
+    <button class="ctx-item" id="ctxDuplicate">
+      <span>📋</span> <span data-i18n="ctxDuplicate">نسخ القالب</span>
+    </button>
+    <div class="ctx-divider"></div>
+    <button class="ctx-item danger" id="ctxDelete">
+      <span>🗑️</span> <span data-i18n="ctxDelete">حذف القالب</span>
+    </button>
+  </div>
+
+  <!-- نافذة إضافة وتعديل القالب -->
+  <div class="modal-backdrop hidden" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow" data-i18n="modalEyebrow">قالب زمني</p>
+          <h3 id="modalTitle">إضافة قالب</h3>
+        </div>
+        <button class="close-btn" id="closeModal">×</button>
+      </div>
+      <form id="blockForm">
+        <input type="hidden" id="blockId">
+        <label>
+          <span data-i18n="formTitle">اسم النشاط</span>
+          <input id="blockTitle" required maxlength="80" placeholder="ما الذي ستقوم به؟">
+        </label>
+        <div class="form-grid">
+          <label>
+            <span data-i18n="formDate">التاريخ</span>
+            <input type="date" id="blockDate" required>
+          </label>
+          <label>
+            <span data-i18n="formCategory">التصنيف</span>
+            <select id="blockCategory"></select>
+          </label>
+        </div>
+        <div class="form-grid">
+          <label>
+            <span data-i18n="formStart">البداية</span>
+            <input type="time" id="blockStart" required>
+          </label>
+          <label>
+            <span data-i18n="formEnd">النهاية</span>
+            <input type="time" id="blockEnd" required>
+          </label>
+        </div>
+        <label class="check">
+          <input type="checkbox" id="blockDone">
+          <span data-i18n="formDone">تحديد كمكتمل</span>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="danger hidden" id="deleteBlock" data-i18n="btnDelete">حذف</button>
+          <button type="button" class="duplicate-btn hidden" id="duplicateBlockBtn" data-i18n="btnDuplicate">📋 نسخ القالب</button>
+          <button type="button" class="ghost" id="cancelModal" data-i18n="btnCancel">إلغاء</button>
+          <button class="primary" type="submit" data-i18n="btnSave">حفظ القالب</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- جلسة التركيز (Focus Mode) -->
+  <div class="focus-overlay hidden" id="focusOverlay">
+    <button class="close-focus" id="closeFocus">×</button>
+    <p class="eyebrow" data-i18n="focusMode">جلسة تركيز</p>
+    <h2 id="focusTitle">تركيز</h2>
+    <div class="focus-timer" id="focusTimer">25:00</div>
+    <div class="focus-actions">
+      <button class="primary" id="focusStart" data-i18n="start">بدء</button>
+      <button class="ghost" id="focusReset" data-i18n="reset">إعادة ضبط</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="app.js"></script>
+</body>
+</html>
