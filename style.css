@@ -43,7 +43,7 @@ body { overflow-x: hidden; }
 
 .app-shell { display: flex; min-height: 100vh; width: 100%; }
 
-/* تنسيق القائمة الجانبية الافتراضي للكمبيوتر */
+/* القائمة الجانبية للديسكتوب */
 .sidebar {
   width: 250px;
   padding: 30px 17px;
@@ -84,6 +84,7 @@ nav { display: grid; gap: 7px; }
   align-items: center;
   font-size: 15px;
   font-weight: 600;
+  cursor: pointer;
 }
 .nav-item:hover { background: var(--blue); color: var(--text); transform: translateX(3px); }
 .nav-item.active {
@@ -104,7 +105,38 @@ nav { display: grid; gap: 7px; }
   box-shadow: 0 0 10px rgba(104,207,155,.5);
 }
 
-/* ضبط اللابتوب حصرياً للشاشات فوق 900px */
+/* أزرار التصدير والاستيراد */
+.backup-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 0 4px;
+  margin-bottom: 6px;
+}
+.backup-btn {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  user-select: none;
+}
+.backup-btn:hover {
+  background: var(--blue);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.backup-btn:active { transform: translateY(0); }
+
+/* تنسيقات الديسكتوب الحصرية */
 @media (min-width: 901px) {
   [dir="ltr"] .sidebar { left: 0; right: auto; border-right: 1px solid var(--line); }
   [dir="ltr"] .main { margin-left: 250px; margin-right: 0; width: calc(100% - 250px); }
@@ -284,8 +316,10 @@ nav { display: grid; gap: 7px; }
   margin-left: 6px;
   opacity: 0.8;
   z-index: 8;
+  cursor: pointer;
 }
 
+/* مقابض التحجيم */
 .resize-handle {
   position: absolute;
   left: 0;
@@ -463,7 +497,53 @@ nav { display: grid; gap: 7px; }
 .ctx-item.danger:hover { background: rgba(231, 104, 123, 0.12); }
 .ctx-divider { height: 1px; background: var(--line); margin: 4px 6px; }
 
-/* المدخلات والنوافذ */
+/* قسم تكرار القوالب داخل المودال */
+.repeat-section {
+  border-top: 1px dashed var(--line);
+  padding-top: 14px;
+  margin-top: 4px;
+}
+.repeat-options {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.days-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.day-chip {
+  flex: 1;
+  min-width: 44px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 7px 4px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+.day-chip:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.day-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(139, 124, 246, 0.28);
+}
+
+/* النوافذ والمدخلات */
 input, select {
   width: 100%;
   background: var(--panel);
@@ -539,7 +619,7 @@ label { display: grid; gap: 7px; font-size: 11px; color: var(--muted); font-weig
   z-index: 10000;
 }
 
-/* ================= معالجة الجوال والشاشات الصغيرة (Mobile Responsive) ================= */
+/* خلفية الجوال */
 .sidebar-backdrop {
   position: fixed;
   inset: 0;
@@ -548,6 +628,7 @@ label { display: grid; gap: 7px; font-size: 11px; color: var(--muted); font-weig
   z-index: 990;
 }
 
+/* ميديا كويري للجوال */
 @media (max-width: 900px) {
   .sidebar {
     width: 260px;
@@ -555,20 +636,10 @@ label { display: grid; gap: 7px; font-size: 11px; color: var(--muted); font-weig
     box-shadow: 0 0 35px rgba(0,0,0,0.25);
   }
   
-  [dir="ltr"] .sidebar {
-    left: 0;
-    right: auto;
-    transform: translateX(-100%);
-  }
-  [dir="rtl"] .sidebar {
-    right: 0;
-    left: auto;
-    transform: translateX(100%);
-  }
+  [dir="ltr"] .sidebar { left: 0; right: auto; transform: translateX(-100%); }
+  [dir="rtl"] .sidebar { right: 0; left: auto; transform: translateX(100%); }
   
-  .sidebar.open {
-    transform: translateX(0) !important;
-  }
+  .sidebar.open { transform: translateX(0) !important; }
 
   .main {
     margin: 0 !important;
@@ -576,9 +647,7 @@ label { display: grid; gap: 7px; font-size: 11px; color: var(--muted); font-weig
     max-width: 100vw !important;
   }
 
-  .mobile-menu {
-    display: block;
-  }
+  .mobile-menu { display: block; }
 
   .topbar {
     padding: 10px 14px;
@@ -586,18 +655,11 @@ label { display: grid; gap: 7px; font-size: 11px; color: var(--muted); font-weig
     gap: 10px;
   }
 
-  .view {
-    padding: 18px 12px 60px;
-  }
+  .view { padding: 18px 12px 60px; }
 
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
+  .dashboard-grid { grid-template-columns: 1fr; }
 
-  .day-panel {
-    position: static;
-    margin-top: 14px;
-  }
+  .day-panel { position: static; margin-top: 14px; }
 
   .hero {
     flex-direction: column;
@@ -605,13 +667,9 @@ label { display: grid; gap: 7px; font-size: 11px; color: var(--muted); font-weig
     gap: 14px;
   }
 
-  .hero h1 {
-    font-size: 28px;
-  }
+  .hero h1 { font-size: 28px; }
 
-  .week-grid {
-    grid-template-columns: repeat(7, 160px);
-  }
+  .week-grid { grid-template-columns: repeat(7, 160px); }
 }
 
 @media (max-width: 600px) {
@@ -624,37 +682,4 @@ label { display: grid; gap: 7px; font-size: 11px; color: var(--muted); font-weig
   [dir="rtl"] .now-dot { right: 56px; }
   .form-grid { grid-template-columns: 1fr; }
   .focus-timer { font-size: 64px; }
-}
-
-/* أزرار النسخ الاحتياطي (تصدير واستيراد) */
-.backup-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  padding: 0 4px;
-  margin-bottom: 6px;
-}
-.backup-btn {
-  background: var(--panel2);
-  border: 1px solid var(--line);
-  color: var(--text);
-  padding: 8px 10px;
-  border-radius: 10px;
-  font-size: 12.5px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-  user-select: none;
-}
-.backup-btn:hover {
-  background: var(--blue);
-  border-color: var(--accent);
-  transform: translateY(-1px);
-}
-.backup-btn:active {
-  transform: translateY(0);
 }

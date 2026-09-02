@@ -1,6 +1,5 @@
 /**
- * Jadwal — Personal Time Operating System (TIME.OS)
- * Full Engine: 24H Timeline, Drag & Drop, Stretch Resizing, Context Menu, Export/Import
+ * Jadwal — Personal Time Manager Engine
  */
 
 const KEY = "jadwal-matrix-v1";
@@ -16,7 +15,6 @@ const dateKey = d => {
 
 const todayKey = dateKey(new Date());
 
-// ================= CATEGORY LOCALIZATION =================
 const CATEGORIES = {
   ar: {
     focus: "تركيز عميق",
@@ -36,7 +34,6 @@ const CATEGORIES = {
   }
 };
 
-// ================= I18N TRANSLATION MATRIX =================
 const I18N = {
   ar: {
     navToday: "اليوم",
@@ -106,7 +103,13 @@ const I18N = {
     importData: "استيراد",
     toastExported: "تم تنزيل ملف النسخة الاحتياطية 📥",
     toastImported: "تم استيراد قوالبك ومهامك بنجاح 📤",
-    alertImportFail: "الملف غير صالح، يرجى اختيار ملف JSON سليم تم تصديره من Jadwal."
+    alertImportFail: "الملف غير صالح، يرجى اختيار ملف JSON سليم تم تصديره من Jadwal.",
+    formRepeat: "تكرار هذا القالب في أيام محددة",
+    repeatDaysLabel: "يتكرر كل:",
+    repeatUntilLabel: "إلى غاية تاريخ:",
+    toastRepeated: "تمت جدولة جميع القوالب المتكررة بنجاح 🔁",
+    alertRepeatDays: "يرجى تحديد يوم واحد على الأقل من أيام الأسبوع للتكرار.",
+    alertRepeatDate: "يرجى تحديد تاريخ نهاية صحيح يكون بعد تاريخ البداية."
   },
   en: {
     navToday: "Today",
@@ -176,14 +179,19 @@ const I18N = {
     importData: "Import",
     toastExported: "Backup downloaded successfully 📥",
     toastImported: "Data imported successfully 📤",
-    alertImportFail: "Invalid file. Please select a valid JSON backup exported from Jadwal."
+    alertImportFail: "Invalid file. Please select a valid JSON backup exported from Jadwal.",
+    formRepeat: "Repeat this block on specific days",
+    repeatDaysLabel: "Repeats on:",
+    repeatUntilLabel: "Repeat until date:",
+    toastRepeated: "All recurring blocks scheduled successfully 🔁",
+    alertRepeatDays: "Please select at least one day of the week to repeat.",
+    alertRepeatDate: "Please select a valid end date after the start date."
   }
 };
 
 let currentLang = localStorage.getItem(LANG_KEY) || "ar";
 let currentTheme = localStorage.getItem(THEME_KEY) || "light";
 
-// ================= THEME SYSTEM =================
 function applyTheme(theme) {
   currentTheme = theme;
   localStorage.setItem(THEME_KEY, theme);
@@ -200,7 +208,6 @@ if ($("themeBtn")) {
   };
 }
 
-// ================= LOCALIZATION CONTROLS =================
 function updateCategoryDropdown() {
   const catSelect = $("blockCategory");
   if (!catSelect) return;
@@ -239,7 +246,6 @@ if ($("langBtn")) {
   $("langBtn").onclick = () => setLanguage(currentLang === "ar" ? "en" : "ar");
 }
 
-// ================= STATE & PERSISTENCE =================
 let state = JSON.parse(localStorage.getItem(KEY) || "null") || {
   blocks: [
     { id: crypto.randomUUID(), date: todayKey, title: "الروتين الصباحي والتأمل", start: "07:00", end: "08:00", category: "health", done: false },
@@ -308,7 +314,6 @@ function showToast(msg) {
   setTimeout(() => t.classList.add("hidden"), 2200);
 }
 
-// ================= OVERLAP & COLLISION CLUSTERING =================
 function layoutClusterBlocks(blocks) {
   if (!blocks.length) return [];
   const sorted = [...blocks].sort((a, b) => {
@@ -365,7 +370,6 @@ function layoutClusterBlocks(blocks) {
   return result;
 }
 
-// Variables for drag, clone, and resize state
 let draggedBlockId = null;
 let isAltCloning = false;
 let isRightDragging = false;
@@ -375,7 +379,6 @@ let didRightDragMove = false;
 let startX = 0, startY = 0;
 let isResizingActive = false;
 
-// ================= CONTEXT MENU LOGIC =================
 const ctxMenu = $("contextMenu");
 let activeContextBlock = null;
 
@@ -468,7 +471,6 @@ if ($("ctxDelete")) {
   };
 }
 
-// ================= TIMELINE RENDERING =================
 function renderTimeline() {
   const key = dateKey(selectedDate);
   const list = blocksFor(key);
@@ -534,10 +536,7 @@ function renderTimeline() {
     x.ondblclick = () => openFocus(b);
 
     x.addEventListener("dragstart", (e) => {
-      if (isResizingActive) {
-        e.preventDefault();
-        return;
-      }
+      if (isResizingActive) { e.preventDefault(); return; }
       draggedBlockId = b.id;
       isAltCloning = e.altKey;
       x.classList.add("dragging");
@@ -564,10 +563,7 @@ function renderTimeline() {
     el.appendChild(x);
   });
 
-  el.ondragover = (e) => {
-    e.preventDefault();
-    el.classList.add("drag-active");
-  };
+  el.ondragover = (e) => { e.preventDefault(); el.classList.add("drag-active"); };
   el.ondragleave = () => el.classList.remove("drag-active");
 
   el.ondrop = (e) => {
@@ -608,7 +604,6 @@ function renderTimeline() {
   addNowLine(el, key);
 }
 
-// ================= STRETCH / RESIZE ENGINE =================
 function initResizeHandle(handle, block, position, blockElement) {
   if (!handle) return;
   handle.addEventListener("pointerdown", (e) => {
@@ -667,7 +662,6 @@ function initResizeHandle(handle, block, position, blockElement) {
   });
 }
 
-// ================= RIGHT-CLICK DRAG COPY TRACKER =================
 window.addEventListener("mousemove", (e) => {
   if (!isRightDragging || !rightDragBlock) return;
   const dist = Math.hypot(e.clientX - startX, e.clientY - startY);
@@ -775,7 +769,6 @@ if ($("duplicateBlockBtn")) {
   };
 }
 
-// ================= INDICATORS & METRICS =================
 function addNowLine(el, key) {
   if (key !== todayKey) return;
   const now = new Date();
@@ -840,7 +833,6 @@ function renderSidePanel() {
   }
 }
 
-// ================= WEEK VIEW =================
 function renderWeek() {
   const grid = $("weekGrid");
   if (!grid) return;
@@ -866,10 +858,7 @@ function renderWeek() {
       </div>
     `;
 
-    col.ondragover = (e) => {
-      e.preventDefault();
-      col.classList.add("drag-over");
-    };
+    col.ondragover = (e) => { e.preventDefault(); col.classList.add("drag-over"); };
     col.ondragleave = () => col.classList.remove("drag-over");
 
     col.ondrop = (e) => {
@@ -943,7 +932,6 @@ function renderWeek() {
   }
 }
 
-// ================= TASKS BOARD =================
 function renderTasks() {
   const el = $("taskList");
   if (!el) return;
@@ -984,7 +972,6 @@ function escapeHtml(s) {
   }[c]));
 }
 
-// ================= MODAL DIALOGS =================
 function openModal(b = null, date = dateKey(selectedDate)) {
   const t = I18N[currentLang];
   if ($("modalBackdrop")) $("modalBackdrop").classList.remove("hidden");
@@ -992,13 +979,31 @@ function openModal(b = null, date = dateKey(selectedDate)) {
   if ($("deleteBlock")) $("deleteBlock").classList.toggle("hidden", !b);
   if ($("duplicateBlockBtn")) $("duplicateBlockBtn").classList.toggle("hidden", !b);
 
+  const targetDate = b?.date || date;
   if ($("blockId")) $("blockId").value = b?.id || "";
   if ($("blockTitle")) $("blockTitle").value = b?.title || "";
-  if ($("blockDate")) $("blockDate").value = b?.date || date;
+  if ($("blockDate")) $("blockDate").value = targetDate;
   if ($("blockStart")) $("blockStart").value = b?.start || "09:00";
   if ($("blockEnd")) $("blockEnd").value = b?.end || "10:00";
   if ($("blockCategory")) $("blockCategory").value = b?.category || "focus";
   if ($("blockDone")) $("blockDone").checked = !!b?.done;
+
+  // إعادة ضبط قسم التكرار
+  const repeatCheckbox = $("blockRepeat");
+  const repeatOptions = $("repeatOptions");
+  if (repeatCheckbox && repeatOptions) {
+    repeatCheckbox.checked = false;
+    repeatOptions.classList.add("hidden");
+
+    const initialDayIndex = new Date(targetDate).getDay();
+    document.querySelectorAll(".day-chip").forEach(chip => {
+      chip.classList.toggle("active", parseInt(chip.dataset.day) === initialDayIndex);
+    });
+
+    const defaultUntil = new Date(targetDate);
+    defaultUntil.setDate(defaultUntil.getDate() + 28);
+    if ($("blockRepeatUntil")) $("blockRepeatUntil").value = dateKey(defaultUntil);
+  }
 }
 
 function closeModal() {
@@ -1008,21 +1013,62 @@ function closeModal() {
 if ($("blockForm")) {
   $("blockForm").onsubmit = (e) => {
     e.preventDefault();
-    const id = $("blockId").value || crypto.randomUUID();
-    const item = {
-      id,
-      date: $("blockDate").value,
-      title: $("blockTitle").value.trim(),
-      start: $("blockStart").value,
-      end: $("blockEnd").value,
-      category: $("blockCategory").value,
-      done: $("blockDone").checked
-    };
+    const title = $("blockTitle").value.trim();
+    const startDate = $("blockDate").value;
+    const start = $("blockStart").value;
+    const end = $("blockEnd").value;
+    const category = $("blockCategory").value;
+    const done = $("blockDone").checked;
+    const isRepeating = $("blockRepeat")?.checked;
+    const existingId = $("blockId").value;
 
-    if (!item.title || minutes(item.end) <= minutes(item.start)) {
+    if (!title || minutes(end) <= minutes(start)) {
       alert(I18N[currentLang].alertValid);
       return;
     }
+
+    if (isRepeating) {
+      const selectedDays = Array.from(document.querySelectorAll(".day-chip.active")).map(c => parseInt(c.dataset.day));
+      const untilDate = $("blockRepeatUntil").value;
+
+      if (!selectedDays.length) {
+        alert(I18N[currentLang].alertRepeatDays);
+        return;
+      }
+      if (!untilDate || untilDate < startDate) {
+        alert(I18N[currentLang].alertRepeatDate);
+        return;
+      }
+
+      let cur = new Date(startDate);
+      const endLimit = new Date(untilDate);
+      let count = 0;
+
+      while (cur <= endLimit && count < 180) {
+        if (selectedDays.includes(cur.getDay())) {
+          state.blocks.push({
+            id: crypto.randomUUID(),
+            date: dateKey(cur),
+            title,
+            start,
+            end,
+            category,
+            done: false
+          });
+        }
+        cur.setDate(cur.getDate() + 1);
+        count++;
+      }
+
+      save();
+      closeModal();
+      render();
+      showToast(I18N[currentLang].toastRepeated);
+      return;
+    }
+
+    const id = existingId || crypto.randomUUID();
+    const item = { id, date: startDate, title, start, end, category, done };
 
     const idx = state.blocks.findIndex(b => b.id === id);
     if (idx >= 0) state.blocks[idx] = item;
@@ -1033,6 +1079,18 @@ if ($("blockForm")) {
     render();
   };
 }
+
+if ($("blockRepeat")) {
+  $("blockRepeat").onchange = (e) => {
+    $("repeatOptions")?.classList.toggle("hidden", !e.target.checked);
+  };
+}
+
+document.querySelectorAll(".day-chip").forEach(chip => {
+  chip.onclick = () => {
+    chip.classList.toggle("active");
+  };
+});
 
 if ($("deleteBlock")) {
   $("deleteBlock").onclick = () => {
@@ -1067,7 +1125,7 @@ function addTask() {
   renderTasks();
 }
 
-// ================= NAVIGATION & VIEW SWITCHING =================
+// تنقل وإغلاق القائمة في الجوال
 const backdrop = $("sidebarBackdrop");
 document.querySelectorAll(".nav-item[data-view]").forEach(btn => {
   btn.onclick = () => {
@@ -1101,7 +1159,6 @@ if (backdrop) {
   };
 }
 
-// ================= LIVE CLOCK =================
 function updateClock() {
   const n = new Date();
   if ($("liveClock")) $("liveClock").textContent = `${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
@@ -1113,7 +1170,6 @@ function updateClock() {
   }
 }
 
-// ================= FOCUS MODE TIMER =================
 function openFocus(b) {
   if ($("focusOverlay")) $("focusOverlay").classList.remove("hidden");
   if ($("focusTitle")) $("focusTitle").textContent = b.title;
@@ -1166,7 +1222,7 @@ if ($("closeFocus")) {
   };
 }
 
-// ================= EXPORT & IMPORT BACKUP SYSTEM =================
+// نظام التصدير والاستيراد
 function exportBackup() {
   const exportPayload = {
     app: "Jadwal",
@@ -1217,7 +1273,6 @@ if ($("exportBtn")) $("exportBtn").onclick = exportBackup;
 if ($("importBtn")) $("importBtn").onclick = () => $("importFileInput").click();
 if ($("importFileInput")) $("importFileInput").onchange = handleImportFile;
 
-// ================= MAIN RENDER PIPELINE =================
 function render() {
   if ($("dateLabel")) $("dateLabel").textContent = fmtDate(selectedDate);
   if ($("timezoneLabel")) $("timezoneLabel").textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -1229,7 +1284,6 @@ function render() {
   updateClock();
 }
 
-// Initial bootstrap
 setInterval(updateClock, 1000);
 applyTheme(currentTheme);
 setLanguage(currentLang);

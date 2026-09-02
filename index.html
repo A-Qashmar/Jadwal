@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- خلفية معتمة تغلق القائمة عند لمسها على الجوال -->
+  <!-- خلفية معتمة للجوال -->
   <div class="sidebar-backdrop hidden" id="sidebarBackdrop"></div>
 
   <div class="app-shell">
@@ -29,7 +29,7 @@
         </button>
       </nav>
       <div class="sidebar-bottom">
-        <!-- أزرار النسخ الاحتياطي (تصدير / استيراد) -->
+        <!-- أزرار النسخ الاحتياطي -->
         <div class="backup-actions">
           <button class="backup-btn" id="exportBtn" title="تنزيل نسخة احتياطية">
             <span>📥</span> <span data-i18n="exportData">تصدير</span>
@@ -223,6 +223,33 @@
           <input type="checkbox" id="blockDone">
           <span data-i18n="formDone">تحديد كمكتمل</span>
         </label>
+
+        <!-- خيار التكرار التلقائي في أيام محددة -->
+        <div class="repeat-section">
+          <label class="check">
+            <input type="checkbox" id="blockRepeat">
+            <span data-i18n="formRepeat">تكرار هذا القالب في أيام محددة</span>
+          </label>
+          <div class="repeat-options hidden" id="repeatOptions">
+            <label><span data-i18n="repeatDaysLabel">يتكرر كل:</span></label>
+            <div class="days-pills" id="repeatDaysPills">
+              <button type="button" class="day-chip" data-day="0" data-i18n-day="sun">أحد</button>
+              <button type="button" class="day-chip" data-day="1" data-i18n-day="mon">إثنين</button>
+              <button type="button" class="day-chip" data-day="2" data-i18n-day="tue">ثلاثاء</button>
+              <button type="button" class="day-chip" data-day="3" data-i18n-day="wed">أربعاء</button>
+              <button type="button" class="day-chip" data-day="4" data-i18n-day="thu">خميس</button>
+              <button type="button" class="day-chip" data-day="5" data-i18n-day="fri">جمعة</button>
+              <button type="button" class="day-chip" data-day="6" data-i18n-day="sat">سبت</button>
+            </div>
+            <div class="form-group" style="margin-top: 10px;">
+              <label>
+                <span data-i18n="repeatUntilLabel">إلى غاية تاريخ:</span>
+                <input type="date" id="blockRepeatUntil">
+              </label>
+            </div>
+          </div>
+        </div>
+
         <div class="modal-actions">
           <button type="button" class="danger hidden" id="deleteBlock" data-i18n="btnDelete">حذف</button>
           <button type="button" class="duplicate-btn hidden" id="duplicateBlockBtn" data-i18n="btnDuplicate">📋 نسخ القالب</button>
