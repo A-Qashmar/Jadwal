@@ -17,7 +17,7 @@ const todayKey = dateKey(new Date());
 
 const CATEGORIES = {
   ar: {
-    focus: "تركيز عميق",
+    Class: "محاضره",
     work: "عمل",
     study: "دراسة",
     personal: "شخصي",
