@@ -43,7 +43,6 @@ body { overflow-x: hidden; }
 
 .app-shell { display: flex; min-height: 100vh; width: 100%; }
 
-/* القائمة الجانبية للديسكتوب */
 .sidebar {
   width: 250px;
   padding: 30px 17px;
@@ -105,7 +104,6 @@ nav { display: grid; gap: 7px; }
   box-shadow: 0 0 10px rgba(104,207,155,.5);
 }
 
-/* أزرار التصدير والاستيراد */
 .backup-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -136,7 +134,6 @@ nav { display: grid; gap: 7px; }
 }
 .backup-btn:active { transform: translateY(0); }
 
-/* تنسيقات الديسكتوب الحصرية */
 @media (min-width: 901px) {
   [dir="ltr"] .sidebar { left: 0; right: auto; border-right: 1px solid var(--line); }
   [dir="ltr"] .main { margin-left: 250px; margin-right: 0; width: calc(100% - 250px); }
@@ -319,7 +316,6 @@ nav { display: grid; gap: 7px; }
   cursor: pointer;
 }
 
-/* مقابض التحجيم */
 .resize-handle {
   position: absolute;
   left: 0;
@@ -344,22 +340,6 @@ nav { display: grid; gap: 7px; }
 .resize-handle.resize-top { top: -2px; }
 .resize-handle.resize-bottom { bottom: -2px; }
 .block:hover .resize-handle::after, .resize-handle.active::after { opacity: 1; background: var(--accent); }
-
-/* ألوان القوالب */
-.block.focus { border-left: 4px solid #8b7cf6; background: rgba(139, 124, 246, 0.12); }
-.block.study { border-left: 4px solid #6f9ff8; background: rgba(111, 159, 248, 0.12); }
-.block.work { border-left: 4px solid #b184e9; background: rgba(177, 132, 233, 0.12); }
-.block.health { border-left: 4px solid #58c89a; background: rgba(88, 200, 154, 0.12); }
-.block.personal { border-left: 4px solid #f3b65e; background: rgba(243, 182, 94, 0.12); }
-.block.break { border-left: 4px solid #a4adbc; background: rgba(164, 173, 188, 0.14); }
-
-[dir="rtl"] .block { border-left: 1px solid var(--line); border-right: 4px solid; }
-[dir="rtl"] .block.focus { border-right-color: #8b7cf6; }
-[dir="rtl"] .block.study { border-right-color: #6f9ff8; }
-[dir="rtl"] .block.work { border-right-color: #b184e9; }
-[dir="rtl"] .block.health { border-right-color: #58c89a; }
-[dir="rtl"] .block.personal { border-right-color: #f3b65e; }
-[dir="rtl"] .block.break { border-right-color: #a4adbc; }
 
 .now-line {
   position: absolute;
@@ -497,7 +477,50 @@ nav { display: grid; gap: 7px; }
 .ctx-item.danger:hover { background: rgba(231, 104, 123, 0.12); }
 .ctx-divider { height: 1px; background: var(--line); margin: 4px 6px; }
 
-/* قسم تكرار القوالب داخل المودال */
+/* تصميم عجلة اختيار الألوان المخصصة */
+.color-picker-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 6px 14px;
+  border-radius: 11px;
+  height: 48px;
+}
+.color-picker-wrap input[type="color"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background: transparent;
+  padding: 0;
+}
+.color-picker-wrap input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.color-picker-wrap input[type="color"]::-webkit-color-swatch {
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.color-picker-wrap input[type="color"]::-moz-color-swatch {
+  border: 2px solid var(--line);
+  border-radius: 50%;
+}
+.color-preview-label {
+  font-family: monospace;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text);
+  letter-spacing: 0.5px;
+}
+
+/* قسم تكرار القوالب */
 .repeat-section {
   border-top: 1px dashed var(--line);
   padding-top: 14px;
@@ -619,7 +642,6 @@ label { display: grid; gap: 7px; font-size: 11px; color: var(--muted); font-weig
   z-index: 10000;
 }
 
-/* خلفية الجوال */
 .sidebar-backdrop {
   position: fixed;
   inset: 0;
@@ -628,7 +650,6 @@ label { display: grid; gap: 7px; font-size: 11px; color: var(--muted); font-weig
   z-index: 990;
 }
 
-/* ميديا كويري للجوال */
 @media (max-width: 900px) {
   .sidebar {
     width: 260px;
@@ -656,19 +677,10 @@ label { display: grid; gap: 7px; font-size: 11px; color: var(--muted); font-weig
   }
 
   .view { padding: 18px 12px 60px; }
-
   .dashboard-grid { grid-template-columns: 1fr; }
-
   .day-panel { position: static; margin-top: 14px; }
-
-  .hero {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-  }
-
+  .hero { flex-direction: column; align-items: flex-start; gap: 14px; }
   .hero h1 { font-size: 28px; }
-
   .week-grid { grid-template-columns: repeat(7, 160px); }
 }
 

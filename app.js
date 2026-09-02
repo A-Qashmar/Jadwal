@@ -69,6 +69,7 @@ const I18N = {
     formCategory: "التصنيف",
     formStart: "البداية",
     formEnd: "النهاية",
+    formColor: "لون التمييز (اختر من العجلة)",
     formDone: "تحديد كمكتمل",
     btnDelete: "حذف",
     btnDuplicate: "📋 نسخ القالب",
@@ -145,6 +146,7 @@ const I18N = {
     formCategory: "Category",
     formStart: "Start Time",
     formEnd: "End Time",
+    formColor: "Highlight Color (Pick from wheel)",
     formDone: "Mark as completed",
     btnDelete: "Delete",
     btnDuplicate: "📋 Duplicate Block",
@@ -246,11 +248,20 @@ if ($("langBtn")) {
   $("langBtn").onclick = () => setLanguage(currentLang === "ar" ? "en" : "ar");
 }
 
+// تحويل كود Hex إلى RGBA للحصول على خلفية شفافة ومريحة للعين
+function hexToRgba(hex, alpha = 0.14) {
+  if (!hex || hex[0] !== '#') return `rgba(139, 124, 246, ${alpha})`;
+  let c = hex.substring(1);
+  if (c.length === 3) c = c.split('').map(x => x + x).join('');
+  const num = parseInt(c, 16);
+  return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+}
+
 let state = JSON.parse(localStorage.getItem(KEY) || "null") || {
   blocks: [
-    { id: crypto.randomUUID(), date: todayKey, title: "الروتين الصباحي والتأمل", start: "07:00", end: "08:00", category: "health", done: false },
-    { id: crypto.randomUUID(), date: todayKey, title: "جلسة برمجة وتطوير الواجهة", start: "08:45", end: "11:15", category: "focus", done: false },
-    { id: crypto.randomUUID(), date: todayKey, title: "غداء واستراحة حركية", start: "13:00", end: "14:00", category: "break", done: false }
+    { id: crypto.randomUUID(), date: todayKey, title: "الروتين الصباحي والتأمل", start: "07:00", end: "08:00", category: "health", color: "#58c89a", done: false },
+    { id: crypto.randomUUID(), date: todayKey, title: "جلسة برمجة وتطوير الواجهة", start: "08:45", end: "11:15", category: "focus", color: "#8b7cf6", done: false },
+    { id: crypto.randomUUID(), date: todayKey, title: "غداء واستراحة حركية", start: "13:00", end: "14:00", category: "break", color: "#a4adbc", done: false }
   ],
   tasks: [
     { id: crypto.randomUUID(), name: "تجهيز معمارية المشروع الجديد", done: false },
@@ -379,6 +390,7 @@ let didRightDragMove = false;
 let startX = 0, startY = 0;
 let isResizingActive = false;
 
+// القائمة المنبثقة
 const ctxMenu = $("contextMenu");
 let activeContextBlock = null;
 
@@ -471,6 +483,7 @@ if ($("ctxDelete")) {
   };
 }
 
+// رسم المخطط الـ 24 ساعة مع الألوان المخصصة
 function renderTimeline() {
   const key = dateKey(selectedDate);
   const list = blocksFor(key);
@@ -493,7 +506,7 @@ function renderTimeline() {
     const top = minutes(b.start);
     const height = Math.max(25, dur(b));
     const x = document.createElement("div");
-    x.className = `block ${b.category} ${b.done ? "done" : ""}`;
+    x.className = `block ${b.done ? "done" : ""}`;
     x.style.top = `${top}px`;
     x.style.height = `${height}px`;
     x.draggable = true;
@@ -510,6 +523,17 @@ function renderTimeline() {
       x.style.width = `calc(${widthPct}% - ${baseOffset / totalCols + 10}px)`;
       x.style.right = "auto";
     }
+
+    // تطبيق اللون المختار من العجلة
+    const blockColor = b.color || '#8b7cf6';
+    if (isRTL) {
+      x.style.borderRight = `4px solid ${blockColor}`;
+      x.style.borderLeft = `1px solid var(--line)`;
+    } else {
+      x.style.borderLeft = `4px solid ${blockColor}`;
+      x.style.borderRight = `1px solid var(--line)`;
+    }
+    x.style.backgroundColor = hexToRgba(blockColor, 0.14);
 
     const categoryLocalized = CATEGORIES[currentLang][b.category] || b.category;
 
@@ -884,6 +908,18 @@ function renderWeek() {
       const x = document.createElement("div");
       x.className = "week-block";
       x.draggable = true;
+
+      const blockColor = b.color || '#8b7cf6';
+      const isRTL = document.documentElement.dir === "rtl";
+      if (isRTL) {
+        x.style.borderRight = `3px solid ${blockColor}`;
+        x.style.borderLeft = `1px solid var(--line)`;
+      } else {
+        x.style.borderLeft = `3px solid ${blockColor}`;
+        x.style.borderRight = `1px solid var(--line)`;
+      }
+      x.style.backgroundColor = hexToRgba(blockColor, 0.12);
+
       x.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b>${escapeHtml(b.title)}</b>
@@ -972,6 +1008,15 @@ function escapeHtml(s) {
   }[c]));
 }
 
+// نافذة القالب ومزامنة اللون
+const colorInput = $("blockColor");
+const colorText = $("colorHexText");
+if (colorInput && colorText) {
+  colorInput.oninput = (e) => {
+    colorText.textContent = e.target.value.toUpperCase();
+  };
+}
+
 function openModal(b = null, date = dateKey(selectedDate)) {
   const t = I18N[currentLang];
   if ($("modalBackdrop")) $("modalBackdrop").classList.remove("hidden");
@@ -988,7 +1033,11 @@ function openModal(b = null, date = dateKey(selectedDate)) {
   if ($("blockCategory")) $("blockCategory").value = b?.category || "focus";
   if ($("blockDone")) $("blockDone").checked = !!b?.done;
 
-  // إعادة ضبط قسم التكرار
+  // تعيين اللون المختار أو الافتراضي
+  const initialColor = b?.color || "#8b7cf6";
+  if (colorInput) colorInput.value = initialColor;
+  if (colorText) colorText.textContent = initialColor.toUpperCase();
+
   const repeatCheckbox = $("blockRepeat");
   const repeatOptions = $("repeatOptions");
   if (repeatCheckbox && repeatOptions) {
@@ -1018,6 +1067,7 @@ if ($("blockForm")) {
     const start = $("blockStart").value;
     const end = $("blockEnd").value;
     const category = $("blockCategory").value;
+    const color = $("blockColor") ? $("blockColor").value : "#8b7cf6";
     const done = $("blockDone").checked;
     const isRepeating = $("blockRepeat")?.checked;
     const existingId = $("blockId").value;
@@ -1053,6 +1103,7 @@ if ($("blockForm")) {
             start,
             end,
             category,
+            color,
             done: false
           });
         }
@@ -1068,7 +1119,7 @@ if ($("blockForm")) {
     }
 
     const id = existingId || crypto.randomUUID();
-    const item = { id, date: startDate, title, start, end, category, done };
+    const item = { id, date: startDate, title, start, end, category, color, done };
 
     const idx = state.blocks.findIndex(b => b.id === id);
     if (idx >= 0) state.blocks[idx] = item;
@@ -1125,7 +1176,6 @@ function addTask() {
   renderTasks();
 }
 
-// تنقل وإغلاق القائمة في الجوال
 const backdrop = $("sidebarBackdrop");
 document.querySelectorAll(".nav-item[data-view]").forEach(btn => {
   btn.onclick = () => {
@@ -1222,7 +1272,6 @@ if ($("closeFocus")) {
   };
 }
 
-// نظام التصدير والاستيراد
 function exportBackup() {
   const exportPayload = {
     app: "Jadwal",

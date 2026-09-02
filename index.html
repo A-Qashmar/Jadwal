@@ -199,6 +199,7 @@
           <span data-i18n="formTitle">اسم النشاط</span>
           <input id="blockTitle" required maxlength="80" placeholder="ما الذي ستقوم به؟">
         </label>
+        
         <div class="form-grid">
           <label>
             <span data-i18n="formDate">التاريخ</span>
@@ -209,6 +210,7 @@
             <select id="blockCategory"></select>
           </label>
         </div>
+
         <div class="form-grid">
           <label>
             <span data-i18n="formStart">البداية</span>
@@ -219,12 +221,22 @@
             <input type="time" id="blockEnd" required>
           </label>
         </div>
+
+        <!-- اختيار اللون من العجلة -->
+        <label>
+          <span data-i18n="formColor">لون التمييز (اختر من العجلة)</span>
+          <div class="color-picker-wrap">
+            <input type="color" id="blockColor" value="#8b7cf6">
+            <span class="color-preview-label" id="colorHexText">#8B7CF6</span>
+          </div>
+        </label>
+
         <label class="check">
           <input type="checkbox" id="blockDone">
           <span data-i18n="formDone">تحديد كمكتمل</span>
         </label>
 
-        <!-- خيار التكرار التلقائي في أيام محددة -->
+        <!-- خيار التكرار التلقائي -->
         <div class="repeat-section">
           <label class="check">
             <input type="checkbox" id="blockRepeat">
@@ -233,13 +245,13 @@
           <div class="repeat-options hidden" id="repeatOptions">
             <label><span data-i18n="repeatDaysLabel">يتكرر كل:</span></label>
             <div class="days-pills" id="repeatDaysPills">
-              <button type="button" class="day-chip" data-day="0" data-i18n-day="sun">أحد</button>
-              <button type="button" class="day-chip" data-day="1" data-i18n-day="mon">إثنين</button>
-              <button type="button" class="day-chip" data-day="2" data-i18n-day="tue">ثلاثاء</button>
-              <button type="button" class="day-chip" data-day="3" data-i18n-day="wed">أربعاء</button>
-              <button type="button" class="day-chip" data-day="4" data-i18n-day="thu">خميس</button>
-              <button type="button" class="day-chip" data-day="5" data-i18n-day="fri">جمعة</button>
-              <button type="button" class="day-chip" data-day="6" data-i18n-day="sat">سبت</button>
+              <button type="button" class="day-chip" data-day="0">أحد</button>
+              <button type="button" class="day-chip" data-day="1">إثنين</button>
+              <button type="button" class="day-chip" data-day="2">ثلاثاء</button>
+              <button type="button" class="day-chip" data-day="3">أربعاء</button>
+              <button type="button" class="day-chip" data-day="4">خميس</button>
+              <button type="button" class="day-chip" data-day="5">جمعة</button>
+              <button type="button" class="day-chip" data-day="6">سبت</button>
             </div>
             <div class="form-group" style="margin-top: 10px;">
               <label>
