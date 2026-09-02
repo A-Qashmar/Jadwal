@@ -69,7 +69,7 @@ const I18N = {
     formCategory: "التصنيف",
     formStart: "البداية",
     formEnd: "النهاية",
-    formColor: "لون التمييز (اختر من العجلة)",
+    formColor: "لون التمييز (عجلة الألوان أو كود Hex)",
     formDone: "تحديد كمكتمل",
     btnDelete: "حذف",
     btnDuplicate: "📋 نسخ القالب",
@@ -146,7 +146,7 @@ const I18N = {
     formCategory: "Category",
     formStart: "Start Time",
     formEnd: "End Time",
-    formColor: "Highlight Color (Pick from wheel)",
+    formColor: "Highlight Color (Color wheel or Hex code)",
     formDone: "Mark as completed",
     btnDelete: "Delete",
     btnDuplicate: "📋 Duplicate Block",
@@ -248,7 +248,6 @@ if ($("langBtn")) {
   $("langBtn").onclick = () => setLanguage(currentLang === "ar" ? "en" : "ar");
 }
 
-// تحويل كود Hex إلى RGBA للحصول على خلفية شفافة ومريحة للعين
 function hexToRgba(hex, alpha = 0.14) {
   if (!hex || hex[0] !== '#') return `rgba(139, 124, 246, ${alpha})`;
   let c = hex.substring(1);
@@ -483,7 +482,6 @@ if ($("ctxDelete")) {
   };
 }
 
-// رسم المخطط الـ 24 ساعة مع الألوان المخصصة
 function renderTimeline() {
   const key = dateKey(selectedDate);
   const list = blocksFor(key);
@@ -524,7 +522,6 @@ function renderTimeline() {
       x.style.right = "auto";
     }
 
-    // تطبيق اللون المختار من العجلة
     const blockColor = b.color || '#8b7cf6';
     if (isRTL) {
       x.style.borderRight = `4px solid ${blockColor}`;
@@ -1008,12 +1005,35 @@ function escapeHtml(s) {
   }[c]));
 }
 
-// نافذة القالب ومزامنة اللون
+// مزامنة عجلة الألوان مع حقل إدخال Hex
 const colorInput = $("blockColor");
-const colorText = $("colorHexText");
-if (colorInput && colorText) {
+const colorHexInput = $("colorHexInput");
+
+if (colorInput && colorHexInput) {
   colorInput.oninput = (e) => {
-    colorText.textContent = e.target.value.toUpperCase();
+    const val = e.target.value.toUpperCase();
+    colorHexInput.value = val;
+    localStorage.setItem("jadwal-last-color", val);
+  };
+
+  colorHexInput.oninput = (e) => {
+    let val = e.target.value.trim();
+    if (!val.startsWith("#") && val.length > 0) val = "#" + val;
+    if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+      colorInput.value = val;
+      localStorage.setItem("jadwal-last-color", val.toUpperCase());
+    }
+  };
+
+  colorHexInput.onblur = (e) => {
+    let val = e.target.value.trim();
+    if (!val.startsWith("#") && val.length > 0) val = "#" + val;
+    if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+      colorHexInput.value = val.toUpperCase();
+      colorInput.value = val;
+    } else {
+      colorHexInput.value = colorInput.value.toUpperCase();
+    }
   };
 }
 
@@ -1033,10 +1053,11 @@ function openModal(b = null, date = dateKey(selectedDate)) {
   if ($("blockCategory")) $("blockCategory").value = b?.category || "focus";
   if ($("blockDone")) $("blockDone").checked = !!b?.done;
 
-  // تعيين اللون المختار أو الافتراضي
-  const initialColor = b?.color || "#8b7cf6";
+  // تعيين واستعادة آخر لون محفوظ
+  const lastSavedColor = localStorage.getItem("jadwal-last-color") || "#8b7cf6";
+  const initialColor = b?.color || lastSavedColor;
   if (colorInput) colorInput.value = initialColor;
-  if (colorText) colorText.textContent = initialColor.toUpperCase();
+  if (colorHexInput) colorHexInput.value = initialColor.toUpperCase();
 
   const repeatCheckbox = $("blockRepeat");
   const repeatOptions = $("repeatOptions");

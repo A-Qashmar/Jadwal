@@ -43,6 +43,7 @@ body { overflow-x: hidden; }
 
 .app-shell { display: flex; min-height: 100vh; width: 100%; }
 
+/* القائمة الجانبية للديسكتوب */
 .sidebar {
   width: 250px;
   padding: 30px 17px;
@@ -104,6 +105,7 @@ nav { display: grid; gap: 7px; }
   box-shadow: 0 0 10px rgba(104,207,155,.5);
 }
 
+/* أزرار التصدير والاستيراد */
 .backup-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -134,6 +136,7 @@ nav { display: grid; gap: 7px; }
 }
 .backup-btn:active { transform: translateY(0); }
 
+/* ضبط اللابتوب فوق 900px */
 @media (min-width: 901px) {
   [dir="ltr"] .sidebar { left: 0; right: auto; border-right: 1px solid var(--line); }
   [dir="ltr"] .main { margin-left: 250px; margin-right: 0; width: calc(100% - 250px); }
@@ -316,6 +319,7 @@ nav { display: grid; gap: 7px; }
   cursor: pointer;
 }
 
+/* مقابض التحجيم */
 .resize-handle {
   position: absolute;
   left: 0;
@@ -477,7 +481,7 @@ nav { display: grid; gap: 7px; }
 .ctx-item.danger:hover { background: rgba(231, 104, 123, 0.12); }
 .ctx-divider { height: 1px; background: var(--line); margin: 4px 6px; }
 
-/* تصميم عجلة اختيار الألوان المخصصة */
+/* تصميم حقل اختيار ولصق كود اللون */
 .color-picker-wrap {
   display: flex;
   align-items: center;
@@ -487,18 +491,24 @@ nav { display: grid; gap: 7px; }
   padding: 6px 14px;
   border-radius: 11px;
   height: 48px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.color-picker-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(139, 124, 246, 0.15);
 }
 .color-picker-wrap input[type="color"] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border: none;
   border-radius: 50%;
   cursor: pointer;
   background: transparent;
   padding: 0;
+  flex-shrink: 0;
 }
 .color-picker-wrap input[type="color"]::-webkit-color-swatch-wrapper {
   padding: 0;
@@ -512,12 +522,19 @@ nav { display: grid; gap: 7px; }
   border: 2px solid var(--line);
   border-radius: 50%;
 }
-.color-preview-label {
+.color-hex-input {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
   font-family: monospace;
   font-weight: 800;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text);
   letter-spacing: 0.5px;
+  outline: none !important;
+  box-shadow: none !important;
+  text-transform: uppercase;
 }
 
 /* قسم تكرار القوالب */
@@ -566,7 +583,7 @@ nav { display: grid; gap: 7px; }
   box-shadow: 0 4px 12px rgba(139, 124, 246, 0.28);
 }
 
-/* النوافذ والمدخلات */
+/* النوافذ والمدخلات مع إصلاح التمرير التلقائي */
 input, select {
   width: 100%;
   background: var(--panel);
@@ -581,22 +598,36 @@ label { display: grid; gap: 7px; font-size: 11px; color: var(--muted); font-weig
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
 .check { display: flex; align-items: center; grid-template-columns: auto 1fr; margin-top: 15px; }
 .check input { width: auto; }
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(8px);
   z-index: 2000;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 16px;
+  overflow-y: auto;
 }
 .modal {
   width: min(500px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 22px;
   padding: 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.modal::-webkit-scrollbar {
+  width: 6px;
+}
+.modal::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 10px;
 }
 .modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
 .modal h3 { margin: 0; font-family: "Plus Jakarta Sans", "Tajawal"; font-size: 22px; }
@@ -694,38 +725,4 @@ label { display: grid; gap: 7px; font-size: 11px; color: var(--muted); font-weig
   [dir="rtl"] .now-dot { right: 56px; }
   .form-grid { grid-template-columns: 1fr; }
   .focus-timer { font-size: 64px; }
-}
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(8px);
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  overflow-y: auto;
-}
-
-.modal {
-  width: min(500px, 100%);
-  max-height: calc(100vh - 32px);
-  overflow-y: auto;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  padding: 24px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--line) transparent;
-}
-
-/* شريط تمرير ناعم وأنيق للمودال */
-.modal::-webkit-scrollbar {
-  width: 6px;
-}
-.modal::-webkit-scrollbar-thumb {
-  background: var(--line);
-  border-radius: 10px;
 }
